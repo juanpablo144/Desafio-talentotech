@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import "./Login.css";
-import { Button, Form, FormGroup, } from 'react-bootstrap';
+import { Button, Form, FormGroup, Alert } from 'react-bootstrap';
 import { iAxios } from "../Services/Interceptors"
 
 function Login() {
@@ -11,6 +11,8 @@ function Login() {
     const [password, setPassword] = useState('');
     const [acceptance, setAcceptance] = useState('');
     const [respuesta, setRespuesta] = useState(null);
+    const [error, setError] = useState('');
+
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -24,7 +26,12 @@ function Login() {
             setRespuesta(respuesta.data)
             console.log(JSON.stringify(respuesta.data))
         } catch (error) {
-            console.log("ERR:" + error.message)
+            if (error.response.status === 400) {
+                setError('Usuario y/o contraseña incorrectos');
+                setRespuesta(null)
+            } else {
+                setError('Error en el servidor. Por favor, inténtalo de nuevo más tarde.');
+            }
         }
         setValidated(true);
 
@@ -54,8 +61,13 @@ function Login() {
                 </FormGroup>
                 <Button variant='warning' type='submit'>Enviar</Button>
             </Form>
-            <h1>Respuesta</h1>
-            <p>{JSON.stringify(respuesta)}</p>
+            {error && <Alert variant="danger">{error}</Alert>}
+            {respuesta !== null && (  // Mostrar solo si respuesta no es null
+                <div>
+                    <h2>Respuesta:</h2>
+                    <p>{JSON.stringify(respuesta)}</p>
+                </div>
+            )}
         </>
     )
 }
